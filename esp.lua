@@ -309,11 +309,7 @@ function EspObject:Render()
 		healthText.Transparency = options.healthTextColor[2];
 		healthText.Outline = options.healthTextOutline;
 		healthText.OutlineColor = parseColor(self, options.healthTextOutlineColor, true);
-
-		local tbX = (healthText.Text:len() * healthText.Size * 0.45)
-		local tbY = healthText.Size
-
-		healthText.Position = lerp2(barTo, barFrom, self.health/self.maxHealth) - Vector2.new(tbX * 0.5, tbY * 0.5) - HEALTH_TEXT_OFFSET;
+		healthText.Position = lerp2(barTo, barFrom, self.health/self.maxHealth) - healthText.TextBounds*0.5 - HEALTH_TEXT_OFFSET;
 	end
 
 	visible.name.Visible = enabled and onScreen and options.name;
@@ -325,8 +321,7 @@ function EspObject:Render()
 		name.Transparency = options.nameColor[2];
 		name.Outline = options.nameOutline;
 		name.OutlineColor = parseColor(self, options.nameOutlineColor, true);
-
-		name.Position = (corners.topLeft + corners.topRight)*0.5 - Vector2.yAxis * (name.Size + 2) - NAME_OFFSET;
+		name.Position = (corners.topLeft + corners.topRight)*0.5 - Vector2.yAxis*name.TextBounds.Y - NAME_OFFSET;
 	end
 
 	visible.distance.Visible = enabled and onScreen and self.distance and options.distance;
@@ -352,15 +347,9 @@ function EspObject:Render()
 		weapon.Transparency = options.weaponColor[2];
 		weapon.Outline = options.weaponOutline;
 		weapon.OutlineColor = parseColor(self, options.weaponOutlineColor, true);
-
-		local textOff = 0
-		if visible.distance.Visible then
-			textOff = weapon.Size + 2
-		end
-
 		weapon.Position =
 			(corners.bottomLeft + corners.bottomRight)*0.5 +
-			(visible.distance.Visible and DISTANCE_OFFSET + Vector2.yAxis * textOff or Vector2.zero);
+			(visible.distance.Visible and DISTANCE_OFFSET + Vector2.yAxis*visible.distance.TextBounds.Y or Vector2.zero);
 	end
 
 	visible.tracer.Visible = enabled and onScreen and options.tracer;
@@ -440,7 +429,6 @@ end
 
 function ChamObject:Construct()
 	self.highlight = Instance.new("Highlight", container);
-	self.highlight.Name = "UIAspectRatioConstraint" -- Mask it from basic name scans
 	self.updateConnection = runService.Heartbeat:Connect(function()
 		self:Update();
 	end);
