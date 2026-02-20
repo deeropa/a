@@ -310,8 +310,8 @@ function EspObject:Render()
 		healthText.Outline = options.healthTextOutline;
 		healthText.OutlineColor = parseColor(self, options.healthTextOutlineColor, true);
 
-		local tbX = healthText.TextBounds and healthText.TextBounds.X or (healthText.Text:len() * healthText.Size * 0.45)
-		local tbY = healthText.TextBounds and healthText.TextBounds.Y > 0 and healthText.TextBounds.Y or healthText.Size
+		local tbX = (healthText.Text:len() * healthText.Size * 0.45)
+		local tbY = healthText.Size
 
 		healthText.Position = lerp2(barTo, barFrom, self.health/self.maxHealth) - Vector2.new(tbX * 0.5, tbY * 0.5) - HEALTH_TEXT_OFFSET;
 	end
@@ -326,8 +326,7 @@ function EspObject:Render()
 		name.Outline = options.nameOutline;
 		name.OutlineColor = parseColor(self, options.nameOutlineColor, true);
 
-		local tbY = name.TextBounds and name.TextBounds.Y > 0 and name.TextBounds.Y or name.Size
-		name.Position = (corners.topLeft + corners.topRight)*0.5 - Vector2.yAxis * tbY - NAME_OFFSET;
+		name.Position = (corners.topLeft + corners.topRight)*0.5 - Vector2.yAxis * (name.Size + 2) - NAME_OFFSET;
 	end
 
 	visible.distance.Visible = enabled and onScreen and self.distance and options.distance;
@@ -356,7 +355,7 @@ function EspObject:Render()
 
 		local textOff = 0
 		if visible.distance.Visible then
-			textOff = (visible.distance.TextBounds and visible.distance.TextBounds.Y > 0) and visible.distance.TextBounds.Y or visible.distance.Size
+			textOff = weapon.Size + 2
 		end
 
 		weapon.Position =
