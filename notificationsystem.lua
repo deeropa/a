@@ -87,6 +87,48 @@ local function notify(text, accentColor, duration)
     Label.TextWrapped = true
     Label.TextTransparency = 1 -- start invisible
 
+    -- Dismiss animation
+    local dismissed = false
+    local function dismissNotif()
+        if dismissed then return end
+        dismissed = true
+
+        local fadeOut = TweenService:Create(Label, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            TextTransparency = 1
+        })
+        fadeOut:Play()
+
+        local accentFade = TweenService:Create(AccentBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundTransparency = 1
+        })
+        accentFade:Play()
+
+        local bgFade = TweenService:Create(Notif, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            BackgroundTransparency = 1
+        })
+        bgFade:Play()
+
+        task.wait(0.2)
+
+        local collapse = TweenService:Create(Notif, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Size = UDim2.new(1, 0, 0, 0)
+        })
+        collapse:Play()
+        collapse.Completed:Wait()
+
+        Notif:Destroy()
+    end
+
+    -- Click to dismiss button
+    local ClickBtn = Instance.new("TextButton")
+    ClickBtn.Name = "ClickDismiss"
+    ClickBtn.Parent = Notif
+    ClickBtn.Size = UDim2.new(1, 0, 1, 0)
+    ClickBtn.BackgroundTransparency = 1
+    ClickBtn.Text = ""
+    ClickBtn.ZIndex = 10
+    ClickBtn.MouseButton1Click:Connect(dismissNotif)
+
     -- Slide in: expand height
     local expandTween = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
         Size = UDim2.new(1, 0, 0, 36)
@@ -101,37 +143,8 @@ local function notify(text, accentColor, duration)
         fadeIn:Play()
     end)
 
-    -- Fade out and collapse after duration
-    task.delay(duration, function()
-        -- Fade out text
-        local fadeOut = TweenService:Create(Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-            TextTransparency = 1
-        })
-        fadeOut:Play()
-
-        -- Fade accent
-        local accentFade = TweenService:Create(AccentBar, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-            BackgroundTransparency = 1
-        })
-        accentFade:Play()
-
-        -- Fade background
-        local bgFade = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-            BackgroundTransparency = 1
-        })
-        bgFade:Play()
-
-        task.wait(0.3)
-
-        -- Collapse height smoothly
-        local collapse = TweenService:Create(Notif, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-            Size = UDim2.new(1, 0, 0, 0)
-        })
-        collapse:Play()
-        collapse.Completed:Wait()
-
-        Notif:Destroy()
-    end)
+    -- Auto-dismiss after duration
+    task.delay(duration, dismissNotif)
 
     return Notif
 end
