@@ -45,8 +45,8 @@ local function notify(text, accentColor, duration)
 
     notifOrder = notifOrder + 1
 
-    -- Main notification frame
-    local Notif = Instance.new("Frame")
+    -- Main notification frame (TextButton for click support)
+    local Notif = Instance.new("TextButton")
     Notif.Name = "Notif_" .. notifOrder
     Notif.Parent = Container
     Notif.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
@@ -55,6 +55,8 @@ local function notify(text, accentColor, duration)
     Notif.Size = UDim2.new(1, 0, 0, 0) -- start collapsed
     Notif.ClipsDescendants = true
     Notif.LayoutOrder = notifOrder
+    Notif.Text = ""
+    Notif.AutoButtonColor = false
 
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -120,12 +122,7 @@ local function notify(text, accentColor, duration)
     end
 
     -- Click to dismiss
-    Notif.Active = true
-    Notif.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dismissNotif()
-        end
-    end)
+    Notif.MouseButton1Click:Connect(dismissNotif)
 
     -- Slide in: expand height
     local expandTween = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
