@@ -26,14 +26,14 @@ local Container = Instance.new("Frame")
 Container.Name = "NotifContainer"
 Container.Parent = NotificationGui
 Container.BackgroundTransparency = 1
-Container.AnchorPoint = Vector2.new(0, 1)
-Container.Position = UDim2.new(0, 16, 1, -16)
+Container.AnchorPoint = Vector2.new(0, 0)
+Container.Position = UDim2.new(0, 16, 0, 16)
 Container.Size = UDim2.new(0, 400, 0.6, 0)
 
 local Layout = Instance.new("UIListLayout")
 Layout.Parent = Container
 Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+Layout.VerticalAlignment = Enum.VerticalAlignment.Top
 Layout.Padding = UDim.new(0, 6)
 
 -- Notification counter for ordering (newest at bottom)
@@ -138,14 +138,5 @@ end
 
 -- Make it globally accessible
 getgenv().notify = notify
-
--- Test notifications
-notify("Notification System Loaded!", Color3.fromRGB(0, 200, 100), 4)
-
-task.wait(0.5)
-notify("An Illusionist Has Joined Your Server! Name: TestPlayer", Color3.fromRGB(0, 170, 255), 5)
-
-task.wait(0.5)
-notify("Ultra detected: Dragon Sage (PlayerName)", Color3.fromRGB(255, 60, 60), 5)
 
 return notify
