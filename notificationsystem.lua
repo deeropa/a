@@ -50,9 +50,9 @@ local function notify(text, accentColor, duration)
     Notif.Name = "Notif_" .. notifOrder
     Notif.Parent = Container
     Notif.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-    Notif.BackgroundTransparency = 0.15
+    Notif.BackgroundTransparency = 1 -- start invisible
     Notif.BorderSizePixel = 0
-    Notif.Size = UDim2.new(1, 0, 0, 0) -- start collapsed
+    Notif.Size = UDim2.new(1, 0, 0, 36) -- full height immediately
     Notif.ClipsDescendants = true
     Notif.LayoutOrder = notifOrder
     Notif.Text = ""
@@ -89,6 +89,9 @@ local function notify(text, accentColor, duration)
     Label.TextWrapped = true
     Label.TextTransparency = 1 -- start invisible
 
+    -- Accent starts invisible too
+    AccentBar.BackgroundTransparency = 1
+
     -- Dismiss animation
     local dismissed = false
     local function dismissNotif()
@@ -124,19 +127,21 @@ local function notify(text, accentColor, duration)
     -- Click to dismiss
     Notif.MouseButton1Click:Connect(dismissNotif)
 
-    -- Slide in: expand height
-    local expandTween = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-        Size = UDim2.new(1, 0, 0, 36)
+    -- Fade in everything
+    local fadeInBg = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        BackgroundTransparency = 0.15
     })
-    expandTween:Play()
+    fadeInBg:Play()
 
-    -- Fade in text
-    task.delay(0.15, function()
-        local fadeIn = TweenService:Create(Label, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
-            TextTransparency = 0
-        })
-        fadeIn:Play()
-    end)
+    local fadeInAccent = TweenService:Create(AccentBar, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        BackgroundTransparency = 0
+    })
+    fadeInAccent:Play()
+
+    local fadeInText = TweenService:Create(Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
+        TextTransparency = 0
+    })
+    fadeInText:Play()
 
     -- Auto-dismiss after duration
     task.delay(duration, dismissNotif)
