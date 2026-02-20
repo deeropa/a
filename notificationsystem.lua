@@ -119,15 +119,13 @@ local function notify(text, accentColor, duration)
         Notif:Destroy()
     end
 
-    -- Click to dismiss button
-    local ClickBtn = Instance.new("TextButton")
-    ClickBtn.Name = "ClickDismiss"
-    ClickBtn.Parent = Notif
-    ClickBtn.Size = UDim2.new(1, 0, 1, 0)
-    ClickBtn.BackgroundTransparency = 1
-    ClickBtn.Text = ""
-    ClickBtn.ZIndex = 10
-    ClickBtn.MouseButton1Click:Connect(dismissNotif)
+    -- Click to dismiss
+    Notif.Active = true
+    Notif.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dismissNotif()
+        end
+    end)
 
     -- Slide in: expand height
     local expandTween = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
