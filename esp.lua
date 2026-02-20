@@ -440,6 +440,7 @@ end
 
 function ChamObject:Construct()
 	self.highlight = Instance.new("Highlight", container);
+	self.highlight.Name = "UIAspectRatioConstraint" -- Mask it from basic name scans
 	self.updateConnection = runService.Heartbeat:Connect(function()
 		self:Update();
 	end);
