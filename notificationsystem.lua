@@ -58,7 +58,7 @@ local function notify(text, accentColor, duration)
 
     -- Main notification (TextButton for click support)
     local Notif = Instance.new("TextButton")
-    Notif.Name = "Notif_" .. tostring(tick()) .. "_" .. notifOrder
+    Notif.Name = "Notif_" .. tostring(tick())
     Notif.Parent = NotificationGui
     Notif.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
     Notif.BackgroundTransparency = 1
