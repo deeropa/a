@@ -7,22 +7,24 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Reuse existing GUI or create new one
-local NotificationGui = getgenv().__notifGui
-if not NotificationGui or not NotificationGui.Parent then
-    NotificationGui = Instance.new("ScreenGui")
-    NotificationGui.Name = "CustomNotifications"
-    NotificationGui.ResetOnSpawn = false
-    NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    NotificationGui.DisplayOrder = 999
-    pcall(function()
-        NotificationGui.Parent = game:GetService("CoreGui")
-    end)
-    if not NotificationGui.Parent then
-        NotificationGui.Parent = PlayerGui
-    end
-    getgenv().__notifGui = NotificationGui
+-- Destroy old one if re-executing
+if getgenv().__notifGui then
+    pcall(function() getgenv().__notifGui:Destroy() end)
 end
+
+-- Create fresh GUI
+local NotificationGui = Instance.new("ScreenGui")
+NotificationGui.Name = "CustomNotifications"
+NotificationGui.ResetOnSpawn = false
+NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+NotificationGui.DisplayOrder = 999
+pcall(function()
+    NotificationGui.Parent = game:GetService("CoreGui")
+end)
+if not NotificationGui.Parent then
+    NotificationGui.Parent = PlayerGui
+end
+getgenv().__notifGui = NotificationGui
 
 -- Track active notifications manually
 local NOTIF_HEIGHT = 36
