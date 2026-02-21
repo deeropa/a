@@ -4,10 +4,8 @@
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Reuse existing GUI or create new
+-- Reuse existing GUI or create new (CoreGui only to avoid anticheat)
 local NotificationGui = getgenv().__notifGui
 if not NotificationGui or not NotificationGui.Parent then
     NotificationGui = Instance.new("ScreenGui")
@@ -15,12 +13,7 @@ if not NotificationGui or not NotificationGui.Parent then
     NotificationGui.ResetOnSpawn = false
     NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     NotificationGui.DisplayOrder = 999
-    pcall(function()
-        NotificationGui.Parent = game:GetService("CoreGui")
-    end)
-    if not NotificationGui.Parent then
-        NotificationGui.Parent = PlayerGui
-    end
+    NotificationGui.Parent = game:GetService("CoreGui")
     getgenv().__notifGui = NotificationGui
 end
 
