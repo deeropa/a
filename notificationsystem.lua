@@ -14,7 +14,6 @@ NotificationGui.ResetOnSpawn = false
 NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 NotificationGui.DisplayOrder = 999
 
--- Try CoreGui first (persists through resets), fall back to PlayerGui
 pcall(function()
     NotificationGui.Parent = game:GetService("CoreGui")
 end)
@@ -22,51 +21,61 @@ if not NotificationGui.Parent then
     NotificationGui.Parent = PlayerGui
 end
 
-local Container = Instance.new("Frame")
-Container.Name = "NotifContainer"
-Container.Parent = NotificationGui
-Container.BackgroundTransparency = 1
-Container.AnchorPoint = Vector2.new(0, 0)
-Container.Position = UDim2.new(0, 16, 0, 16)
-Container.Size = UDim2.new(0, 400, 0.6, 0)
+-- Track active notifications manually
+local NOTIF_HEIGHT = 36
+local NOTIF_GAP = 6
+local activeNotifs = {} -- ordered list of active notification frames
 
-local Layout = Instance.new("UIListLayout")
-Layout.Parent = Container
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-Layout.VerticalAlignment = Enum.VerticalAlignment.Top
-Layout.Padding = UDim.new(0, 6)
+local function repositionAll()
+    for i, notif in ipairs(activeNotifs) do
+        local targetY = (i - 1) * (NOTIF_HEIGHT + NOTIF_GAP)
+        TweenService:Create(notif, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, 16, 0, 16 + targetY)
+        }):Play()
+    end
+end
 
--- Notification counter for ordering (newest at bottom)
-local notifOrder = 0
+local function removeFromList(notif)
+    for i, n in ipairs(activeNotifs) do
+        if n == notif then
+            table.remove(activeNotifs, i)
+            break
+        end
+    end
+    repositionAll()
+end
 
 local function notify(text, accentColor, duration)
     accentColor = accentColor or Color3.fromRGB(0, 200, 255)
     duration = duration or 4
 
-    notifOrder = notifOrder + 1
+    local yPos = #activeNotifs * (NOTIF_HEIGHT + NOTIF_GAP)
 
-    -- Main notification frame (TextButton for click support)
+    -- Main notification (TextButton for click support)
     local Notif = Instance.new("TextButton")
-    Notif.Name = "Notif_" .. notifOrder
-    Notif.Parent = Container
+    Notif.Name = "Notif"
+    Notif.Parent = NotificationGui
     Notif.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-    Notif.BackgroundTransparency = 1 -- start invisible
+    Notif.BackgroundTransparency = 1
     Notif.BorderSizePixel = 0
-    Notif.Size = UDim2.new(1, 0, 0, 36) -- full height immediately
+    Notif.Position = UDim2.new(0, 16, 0, 16 + yPos)
+    Notif.Size = UDim2.new(0, 400, 0, NOTIF_HEIGHT)
     Notif.ClipsDescendants = true
-    Notif.LayoutOrder = notifOrder
     Notif.Text = ""
     Notif.AutoButtonColor = false
+
+    table.insert(activeNotifs, Notif)
 
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
     Corner.Parent = Notif
 
-    -- Accent bar on left
+    -- Accent bar
     local AccentBar = Instance.new("Frame")
     AccentBar.Name = "Accent"
     AccentBar.Parent = Notif
     AccentBar.BackgroundColor3 = accentColor
+    AccentBar.BackgroundTransparency = 1
     AccentBar.BorderSizePixel = 0
     AccentBar.Size = UDim2.new(0, 4, 1, 0)
 
@@ -74,7 +83,7 @@ local function notify(text, accentColor, duration)
     AccentCorner.CornerRadius = UDim.new(0, 4)
     AccentCorner.Parent = AccentBar
 
-    -- Text label
+    -- Text
     local Label = Instance.new("TextLabel")
     Label.Name = "Text"
     Label.Parent = Notif
@@ -87,69 +96,36 @@ local function notify(text, accentColor, duration)
     Label.TextSize = 14
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.TextWrapped = true
-    Label.TextTransparency = 1 -- start invisible
+    Label.TextTransparency = 1
 
-    -- Accent starts invisible too
-    AccentBar.BackgroundTransparency = 1
-
-    -- Dismiss animation
+    -- Dismiss
     local dismissed = false
     local function dismissNotif()
         if dismissed then return end
         dismissed = true
 
-        local fadeOut = TweenService:Create(Label, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            TextTransparency = 1
-        })
-        fadeOut:Play()
+        TweenService:Create(Label, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { TextTransparency = 1 }):Play()
+        TweenService:Create(AccentBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
+        TweenService:Create(Notif, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
 
-        local accentFade = TweenService:Create(AccentBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            BackgroundTransparency = 1
-        })
-        accentFade:Play()
-
-        local bgFade = TweenService:Create(Notif, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            BackgroundTransparency = 1
-        })
-        bgFade:Play()
-
-        task.wait(0.2)
-
-        local collapse = TweenService:Create(Notif, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-            Size = UDim2.new(1, 0, 0, 0)
-        })
-        collapse:Play()
-        collapse.Completed:Wait()
-
+        task.wait(0.25)
+        removeFromList(Notif)
         Notif:Destroy()
     end
 
-    -- Click to dismiss
     Notif.MouseButton1Click:Connect(dismissNotif)
 
-    -- Fade in everything
-    local fadeInBg = TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-        BackgroundTransparency = 0.15
-    })
-    fadeInBg:Play()
+    -- Fade in
+    TweenService:Create(Notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { BackgroundTransparency = 0.15 }):Play()
+    TweenService:Create(AccentBar, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { BackgroundTransparency = 0 }):Play()
+    TweenService:Create(Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { TextTransparency = 0 }):Play()
 
-    local fadeInAccent = TweenService:Create(AccentBar, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-        BackgroundTransparency = 0
-    })
-    fadeInAccent:Play()
-
-    local fadeInText = TweenService:Create(Label, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
-        TextTransparency = 0
-    })
-    fadeInText:Play()
-
-    -- Auto-dismiss after duration
+    -- Auto-dismiss
     task.delay(duration, dismissNotif)
 
     return Notif
 end
 
--- Make it globally accessible
 getgenv().notify = notify
 
 return notify
