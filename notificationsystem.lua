@@ -8,7 +8,10 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Reuse existing GUI or create new one
-local NotificationGui = game:GetService("CoreGui"):FindFirstChild("CustomNotifications")
+local NotificationGui
+pcall(function()
+    NotificationGui = game:GetService("CoreGui"):FindFirstChild("CustomNotifications")
+end)
 if not NotificationGui then
     NotificationGui = PlayerGui:FindFirstChild("CustomNotifications")
 end
