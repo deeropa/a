@@ -8,14 +8,8 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Reuse existing GUI or create new one
-local NotificationGui
-pcall(function()
-    NotificationGui = game:GetService("CoreGui"):FindFirstChild("CustomNotifications")
-end)
-if not NotificationGui then
-    NotificationGui = PlayerGui:FindFirstChild("CustomNotifications")
-end
-if not NotificationGui then
+local NotificationGui = getgenv().__notifGui
+if not NotificationGui or not NotificationGui.Parent then
     NotificationGui = Instance.new("ScreenGui")
     NotificationGui.Name = "CustomNotifications"
     NotificationGui.ResetOnSpawn = false
@@ -27,6 +21,7 @@ if not NotificationGui then
     if not NotificationGui.Parent then
         NotificationGui.Parent = PlayerGui
     end
+    getgenv().__notifGui = NotificationGui
 end
 
 -- Track active notifications manually
